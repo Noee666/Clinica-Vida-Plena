@@ -1,0 +1,25 @@
+# Contraseñas y configuración local
+.env
+*.env
+.pgpass
+pgpass.conf
+
+# DataGrip / IntelliJ
+.idea/
+*.iml
+dataSources/
+dataSources.local.xml
+
+# Visual Studio Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales y registros
+*.log
+*.tmp
+*.bak
+~$*
