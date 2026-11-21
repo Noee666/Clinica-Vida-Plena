@@ -4,8 +4,9 @@
 
 CREATE SCHEMA IF NOT EXISTS clinica;
 
+
 -- Necesaria para las restricciones EXCLUDE
-CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA clinica;
 
 -- ---------------------------------------------------------------------
 --  Tablas base
