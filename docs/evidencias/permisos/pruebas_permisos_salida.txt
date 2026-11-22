@@ -1,0 +1,134 @@
+BEGIN
+CREATE FUNCTION
+GRANT
+DO
+
+############ 1. rol_recepcion ############
+SET
+  rol_activo   
+---------------
+ rol_recepcion
+
+   fecha    |   hora   |          paciente          |     medico     | especialidad |       sede        |   estado   
+------------+----------+----------------------------+----------------+--------------+-------------------+------------
+ 2026-11-23 | 08:00:00 | Leticia Gastélum Escalante | Fernanda Soto  | Ginecología  | Vida Plena Centro | cancelada
+ 2026-11-23 | 08:00:00 | Andrea Soto Gastélum       | Adriana Moreno | Pediatría    | Vida Plena Norte  | confirmada
+ 2026-11-23 | 08:30:00 | Sergio Ortiz Vázquez       | Fernando Ochoa | Cardiología  | Vida Plena Norte  | programada
+
+INSERT 0 1
+INSERT 0 1
+ p_id_cita 
+-----------
+     50031
+
+                                          probar                                          
+------------------------------------------------------------------------------------------
+ DENEGADO   leer consulta.notas_clinicas  (permission denied for table consulta)
+ DENEGADO   leer consulta.motivo  (permission denied for table consulta)
+ DENEGADO   leer consulta_diagnostico  (permission denied for table consulta_diagnostico)
+ DENEGADO   leer receta_linea  (permission denied for table receta_linea)
+ DENEGADO   leer receta.indicaciones  (permission denied for table receta)
+ DENEGADO   leer auditoria  (permission denied for table auditoria)
+ DENEGADO   escribir en auditoria  (permission denied for table auditoria)
+ DENEGADO   modificar existencias  (permission denied for table existencia)
+ DENEGADO   borrar pagos  (permission denied for table pago)
+
+RESET
+
+############ 2. rol_medico ############
+SET
+ rol_activo 
+------------
+ rol_medico
+
+ p_id_consulta 
+---------------
+         36700
+
+ id_cita |  estado  | id_consulta |           motivo            
+---------+----------+-------------+-----------------------------
+      21 | atendida |       36700 | Prueba de permisos: control
+
+INSERT 0 1
+INSERT 0 1
+                                      probar                                       
+-----------------------------------------------------------------------------------
+ DENEGADO   registrar un pago  (permission denied for procedure sp_registrar_pago)
+ DENEGADO   leer facturas  (permission denied for table factura)
+ DENEGADO   modificar existencias  (permission denied for table existencia)
+ DENEGADO   leer auditoria  (permission denied for table auditoria)
+
+RESET
+
+############ 3. rol_farmacia ############
+SET
+  rol_activo  
+--------------
+ rol_farmacia
+
+ numero_linea |   nombre    |   dosis   |  frecuencia  | cantidad 
+--------------+-------------+-----------+--------------+----------
+            1 | Paracetamol | 1 tableta | Cada 8 horas |        1
+
+ p_id_dispensacion 
+-------------------
+             23144
+
+                                          probar                                          
+------------------------------------------------------------------------------------------
+ DENEGADO   leer consulta.notas_clinicas  (permission denied for table consulta)
+ DENEGADO   leer consulta_diagnostico  (permission denied for table consulta_diagnostico)
+ DENEGADO   leer facturas  (permission denied for table factura)
+ DENEGADO   crear citas  (permission denied for table cita)
+
+RESET
+
+############ 4. rol_recepcion cobra la consulta ############
+SET
+ p_id_factura 
+--------------
+        36700
+
+psql:docs/evidencias/permisos/pruebas_permisos.sql:147: NOTICE:  Pago 35519 registrado. Factura 36700: saldo 0.00, estado pagada
+ p_id_pago 
+-----------
+     35519
+
+ id_factura | subtotal | monto_paciente | saldo | estado 
+------------+----------+----------------+-------+--------
+      36700 |   535.00 |         107.00 |  0.00 | pagada
+
+RESET
+
+############ 5. rol_auditor ############
+SET
+ rol_activo  
+-------------
+ rol_auditor
+
+        tabla         | operacion | usuario  | cambios 
+----------------------+-----------+----------+---------
+ cita                 | INSERT    | postgres |       1
+ cita                 | UPDATE    | postgres |       1
+ consulta             | INSERT    | postgres |       1
+ consulta_diagnostico | INSERT    | postgres |       1
+ dispensacion         | INSERT    | postgres |       1
+ existencia           | UPDATE    | postgres |       1
+ factura              | INSERT    | postgres |       1
+ factura              | UPDATE    | postgres |       3
+ paciente             | INSERT    | postgres |       1
+ pago                 | INSERT    | postgres |       1
+ receta               | INSERT    | postgres |       1
+ receta               | UPDATE    | postgres |       1
+
+                                 probar                                  
+-------------------------------------------------------------------------
+ DENEGADO   borrar auditoria  (permission denied for table auditoria)
+ DENEGADO   modificar auditoria  (permission denied for table auditoria)
+ DENEGADO   leer pacientes  (permission denied for table paciente)
+ DENEGADO   leer consultas  (permission denied for table consulta)
+
+RESET
+ROLLBACK
+
+ROLLBACK: la base quedó sin cambios.

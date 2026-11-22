@@ -1,0 +1,78 @@
+Respaldo y restauración — Clínica Vida Plena
+============================================
+
+Servidor: 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)   pg_dump: pg_dump (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
+Fecha: 2026-11-21 21:06 MST
+
+$ pg_dump -U postgres -Fc -d clinica -f respaldo/clinica.dump
+(sin errores)
+Tamaño del respaldo: 3369656 bytes
+
+$ pg_restore -l respaldo/clinica.dump   (resumen: cuántos objetos de cada tipo contiene)
+     295  ACL
+      44  CONSTRAINT
+      36  FK CONSTRAINT
+      26  TABLE
+      26  TABLE DATA
+      24  TRIGGER
+      22  FUNCTION
+      18  INDEX
+      15  SEQUENCE
+      15  SEQUENCE SET
+       7  COMMENT
+       6  PROCEDURE
+       4  VIEW
+       2  EXTENSION
+       1  SCHEMA
+
+$ createdb -U postgres clinica_restaurada
+(sin errores)
+
+$ pg_restore -U postgres -d clinica_restaurada respaldo/clinica.dump
+(sin errores)
+
+Comparación de filas por tabla (consulta del README) en las dos bases
+--------------------------------------------------------------------
+
+Original (clinica)                      | Restaurada (clinica_restaurada)
+        tabla         | filas           |        tabla         | filas 
+----------------------+-------          |----------------------+-------
+ aseguradora          |     4           | aseguradora          |     4
+ auditoria            |     0           | auditoria            |     0
+ cita                 | 50028           | cita                 | 50028
+ consulta             | 36699           | consulta             | 36699
+ consulta_diagnostico | 37890           | consulta_diagnostico | 37890
+ diagnostico          |    17           | diagnostico          |    17
+ dispensacion         | 23141           | dispensacion         | 23141
+ dispensacion_detalle | 30561           | dispensacion_detalle | 30561
+ empleado             |    26           | empleado             |    26
+ especialidad         |     6           | especialidad         |     6
+ existencia           |    82           | existencia           |    82
+ factura              | 36699           | factura              | 36699
+ factura_linea        | 67260           | factura_linea        | 67260
+ farmaceutico         |     3           | farmaceutico         |     3
+ horario              |    89           | horario              |    89
+ lote                 |    40           | lote                 |    40
+ medicamento          |    20           | medicamento          |    20
+ medico               |    20           | medico               |    20
+ medico_especialidad  |    26           | medico_especialidad  |    26
+ paciente             |   505           | paciente             |   505
+ pago                 | 35514           | pago                 | 35514
+ persona              |   526           | persona              |   526
+ recepcionista        |     3           | recepcionista        |     3
+ receta               | 27079           | receta               | 27079
+ receta_linea         | 35753           | receta_linea         | 35753
+ sede                 |     3           | sede                 |     3
+(26 rows)                    |(26 rows)
+
+$ diff  <conteos de clinica>  <conteos de clinica_restaurada>
+(sin diferencias: las 26 tablas tienen exactamente las mismas filas)
+
+Objetos de programación en la base restaurada:
+ vistas | procedimientos | triggers | indices 
+--------+----------------+----------+---------
+      4 |              6 |       24 |      62
+(1 row)
+
+Los permisos (GRANT) se restauraron porque los roles ya existen en este servidor.
+En un servidor nuevo, primero se ejecuta sql/06_seguridad.sql para crear los roles.
