@@ -1,0 +1,43 @@
+READ COMMITTED contra REPEATABLE READ
+=====================================
+
+Demostración 5 de 08_transacciones.sql. En READ COMMITTED cada sentencia ve lo último confirmado
+(lectura no repetible). En REPEATABLE READ la transacción ve una foto fija, y si intenta modificar
+una fila que otra sesión cambió después, falla con "could not serialize access" y debe reintentarse.
+
+Tiempo   Sesión  Sentencia / resultado
+------------------------------------------------------------------------
+  0.07 s  [A] SQL> BEGIN;  -- READ COMMITTED, el nivel por defecto
+  0.07 s  [A] SQL> SELECT stock FROM clinica.existencia WHERE id_lote = 2 AND id_sede = 1;
+  0.07 s  [A]       stock 
+  0.07 s  [A]      -------
+  0.07 s  [A]         100
+  0.07 s  [B] SQL> UPDATE clinica.existencia SET stock = stock - 10 WHERE id_lote = 2 AND id_sede = 1;
+  0.07 s  [B] --   B confirma (autocommit)
+  0.08 s  [A] SQL> SELECT stock FROM clinica.existencia WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [A] --   misma consulta, misma transacción: el valor CAMBIÓ
+  0.08 s  [A]       stock 
+  0.08 s  [A]      -------
+  0.08 s  [A]          90
+  0.08 s  [A] SQL> COMMIT;
+  0.08 s  [A] SQL> BEGIN ISOLATION LEVEL REPEATABLE READ;
+  0.08 s  [A] SQL> SELECT stock FROM clinica.existencia WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [A]       stock 
+  0.08 s  [A]      -------
+  0.08 s  [A]          90
+  0.08 s  [B] SQL> UPDATE clinica.existencia SET stock = stock - 10 WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [B] --   B confirma otra vez
+  0.08 s  [A] SQL> SELECT stock FROM clinica.existencia WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [A] --   en REPEATABLE READ la foto NO cambia
+  0.08 s  [A]       stock 
+  0.08 s  [A]      -------
+  0.08 s  [A]          90
+  0.08 s  [A] SQL> UPDATE clinica.existencia SET stock = stock - 1 WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [A] --   A intenta modificar una fila que cambió después de su foto
+  0.08 s  [A]      ERROR:  could not serialize access due to concurrent update
+  0.08 s  [A] SQL> ROLLBACK;
+  0.08 s  [B] SQL> SELECT stock FROM clinica.existencia WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [B] --   valor real al final
+  0.08 s  [B]       stock 
+  0.08 s  [B]      -------
+  0.08 s  [B]          80

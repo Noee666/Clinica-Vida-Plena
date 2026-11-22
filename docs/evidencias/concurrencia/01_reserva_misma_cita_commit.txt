@@ -1,0 +1,29 @@
+Reservar la misma cita al mismo tiempo — A termina con COMMIT
+=============================================================
+
+Demostración 1 de 08_transacciones.sql con dos sesiones reales (RN-08).
+Bloque: Dr. Salazar (id 19), 2026-11-23 08:00:00-07, sede 1.
+La sesión B queda ESPERANDO porque el índice único parcial uq_cita_medico_hora ya tiene una
+entrada sin confirmar de A. Cuando A termina con COMMIT, B se libera al instante:
+con COMMIT de A, B recibe el error de bloque ocupado: solo queda una cita.
+
+Tiempo   Sesión  Sentencia / resultado
+------------------------------------------------------------------------
+  0.07 s  [A] SQL> BEGIN;
+  0.07 s  [A] SQL> CALL clinica.sp_reservar_cita(4, 19, 1, 1, '2026-11-23 08:00:00-07', NULL);
+  0.07 s  [A] --   paciente 4 reserva el bloque (sin confirmar todavía)
+  0.07 s  [A]       p_id_cita 
+  0.07 s  [A]      -----------
+  0.07 s  [A]           50031
+  0.07 s  [B] SQL> CALL clinica.sp_reservar_cita(5, 19, 1, 1, '2026-11-23 08:00:00-07', NULL);
+  0.07 s  [B] --   paciente 5 pide el MISMO bloque del mismo médico
+  2.07 s  [B]      ... sigue ESPERANDO (bloqueada)
+  3.07 s  [A] SQL> COMMIT;
+  3.07 s  [B]      ERROR:  El médico 19 ya tiene una cita activa el 2026-11-23 08:00:00-07
+  3.07 s  [B]      HINT:  Consulte clinica.fn_horarios_disponibles() para ver los bloques libres.
+  3.07 s  [B]      CONTEXT:  PL/pgSQL function clinica.sp_reservar_cita(integer,integer,integer,integer,timestamp with time zone,integer) line 13 at RAISE
+  3.07 s  [B] SQL> SELECT id_cita, id_paciente, fecha_hora, estado FROM clinica.cita WHERE id_medico = 19 AND fecha_hora = '2026-11-23 08:00:00-07' AND estado <> 'cancelada';
+  3.07 s  [B] --   ¿cuántas citas activas quedaron en ese bloque?
+  3.07 s  [B]       id_cita | id_paciente |       fecha_hora       |   estado   
+  3.07 s  [B]      ---------+-------------+------------------------+------------
+  3.07 s  [B]         50031 |           4 | 2026-11-23 08:00:00-07 | programada

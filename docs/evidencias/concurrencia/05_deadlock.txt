@@ -1,0 +1,27 @@
+Interbloqueo (deadlock)
+=======================
+
+Demostración 4c de 08_transacciones.sql. Cada sesión bloquea un lote y luego pide el de la otra.
+Tras deadlock_timeout (1 s) PostgreSQL detecta el ciclo y aborta UNA de las dos transacciones;
+la otra continúa. Por eso sp_dispensar_receta pide los bloqueos siempre en el mismo orden.
+
+Tiempo   Sesión  Sentencia / resultado
+------------------------------------------------------------------------
+  0.08 s  [A] SQL> BEGIN;
+  0.08 s  [B] SQL> BEGIN;
+  0.08 s  [A] SQL> UPDATE clinica.existencia SET stock = stock WHERE id_lote = 1 AND id_sede = 1;
+  0.08 s  [A] --   A bloquea el lote 1
+  0.08 s  [B] SQL> UPDATE clinica.existencia SET stock = stock WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [B] --   B bloquea el lote 2
+  0.08 s  [A] SQL> UPDATE clinica.existencia SET stock = stock WHERE id_lote = 2 AND id_sede = 1;
+  0.08 s  [A] --   A pide el lote 2 (lo tiene B)
+  1.08 s  [A]      ... sigue ESPERANDO (bloqueada)
+  1.08 s  [B] SQL> UPDATE clinica.existencia SET stock = stock WHERE id_lote = 1 AND id_sede = 1;
+  1.08 s  [B] --   B pide el lote 1 (lo tiene A): ciclo
+  2.08 s  [B]      ERROR:  deadlock detected
+  2.08 s  [B]      DETAIL:  Process 887 waits for ShareLock on transaction 1722; blocked by process 884.
+  2.08 s  [B]      Process 884 waits for ShareLock on transaction 1723; blocked by process 887.
+  2.08 s  [B]      HINT:  See server log for query details.
+  2.08 s  [B]      CONTEXT:  while updating tuple (0,1) in relation "existencia"
+  2.08 s  [A] SQL> ROLLBACK;
+  2.08 s  [B] SQL> ROLLBACK;
