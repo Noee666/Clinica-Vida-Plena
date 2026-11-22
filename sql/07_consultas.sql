@@ -1,5 +1,7 @@
 -- Clínica Vida Plena — Consultas del proyecto (preguntas 1 a 15)
--- Ejecutar después de 01_schema.sql y 02_datos_ejemplo.sql.
+-- Autores: Ibarra Lopez Danna Alejandra (preguntas 1 a 6)
+--          Escobedo Ayala Andres Manuel (preguntas 7 a 15)
+-- Ejecutar después de 01_esquema.sql y 02_datos.sql.
 -- Las muestras son ilustrativas; el resultado real depende de los datos
 -- cargados y, en consultas con CURRENT_DATE, de la fecha de ejecución.
 

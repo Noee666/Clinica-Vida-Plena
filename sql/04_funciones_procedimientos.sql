@@ -1,6 +1,7 @@
 -- =====================================================================
 --  Clínica Vida Plena — Funciones y procedimientos almacenados
---  Ejecutar después de 01_schema.sql y 02_datos_ejemplo.sql
+--  Autor: Cornejo Silva Martin Noe
+--  Ejecutar después de 01_esquema.sql y 02_datos.sql
 --
 --  Reglas cubiertas:
 --    RN-02  fn_edad / fn_es_menor (apoyo para el trigger de menores)

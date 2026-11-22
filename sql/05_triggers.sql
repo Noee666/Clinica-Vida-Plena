@@ -1,5 +1,6 @@
 -- =====================================================================
 --  Clínica Vida Plena — Triggers
+--  Autor: Cornejo Silva Martin Noe
 --  Ejecutar después de 04_funciones_procedimientos.sql.
 --
 --  Reglas cubiertas:
@@ -40,13 +41,6 @@
 -- Se restablece al final del archivo para no afectar a los demás scripts.
 SET client_min_messages = warning;
 
-
--- =====================================================================
---  0. Tabla de auditoría                                        RN-18
---  NOTA: el README cuenta 26 tablas con `auditoria`, pero 01_schema.sql
---  todavía no la crea. Se crea aquí con IF NOT EXISTS para que el
---  proyecto funcione; lo ideal es moverla a 01_schema.sql.
--- =====================================================================
 
 CREATE INDEX IF NOT EXISTS ix_auditoria_tabla_fecha
     ON clinica.auditoria (tabla, fecha);
