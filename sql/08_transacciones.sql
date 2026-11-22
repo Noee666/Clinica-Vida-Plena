@@ -1,6 +1,6 @@
 -- =====================================================================
 --  Clínica Vida Plena — Transacciones y concurrencia
---  Autor: Cornejo Silva Martin Noe
+--  Autor: Torres Gonzalez Gael Andres
 --  Ejecutar después de 05_triggers.sql (normalmente desde ejecutar_todo.sql).
 --
 --  Cinco demostraciones:
